@@ -16,5 +16,6 @@ public class TraineeEmployeeResponse {
     private String phone;
     private String position;
     private String team;
+    private String responsibility;
     private boolean inMyTeam;
 }

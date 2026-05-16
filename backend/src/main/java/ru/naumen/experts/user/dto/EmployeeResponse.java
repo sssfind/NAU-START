@@ -17,6 +17,7 @@ public class EmployeeResponse {
     private String position;
     private String photoUrl;
     private String team;
+    private String responsibility;
     private Integer totalProgress;
     private Integer moodLevel;
     private Long hrId;

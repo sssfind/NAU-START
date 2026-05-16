@@ -63,13 +63,20 @@ export function useAddTraineeTaskComment() {
   })
 }
 
-export function useTraineeEmployees(search: string, page: number) {
+export function useTraineeEmployees(
+  search: string,
+  department: string,
+  team: string,
+  page: number
+) {
   return useQuery({
-    queryKey: ['trainee', 'employees', search, page],
+    queryKey: ['trainee', 'employees', search, department, team, page],
     queryFn: async () => {
       const { data } = await api.get<PagedTraineeEmployees>('/trainee/employees', {
         params: {
           search: search || undefined,
+          department: department || undefined,
+          team: team || undefined,
           page,
           size: 20,
         },

@@ -123,30 +123,40 @@ export function AdaptationPathTimeline({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-600">
+      <div
+        className={cn(
+          'mt-4 flex flex-wrap gap-x-5 gap-y-2 text-gray-600',
+          compact ? 'text-xs' : 'text-sm'
+        )}
+      >
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-6 rounded-sm bg-sky-500" />
+          <span className={cn('rounded-sm bg-sky-500', compact ? 'h-2.5 w-6' : 'h-3 w-8')} />
           Знакомство — сделано
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-6 rounded-sm bg-violet-500" />
+          <span className={cn('rounded-sm bg-violet-500', compact ? 'h-2.5 w-6' : 'h-3 w-8')} />
           Навыки — сделано
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-6 rounded-sm bg-emerald-500" />
+          <span className={cn('rounded-sm bg-emerald-500', compact ? 'h-2.5 w-6' : 'h-3 w-8')} />
           Работа — сделано
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-6 rounded-sm bg-sky-100 ring-1 ring-sky-200" />
+          <span
+            className={cn(
+              'rounded-sm bg-sky-100 ring-1 ring-sky-200',
+              compact ? 'h-2.5 w-6' : 'h-3 w-8'
+            )}
+          />
           Запланировано
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-6 rounded-sm bg-red-400" />
+          <span className={cn('rounded-sm bg-red-400', compact ? 'h-2.5 w-6' : 'h-3 w-8')} />
           Просрочено
         </span>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-4 text-xs">
+      <div className={cn('mt-6 flex flex-wrap gap-4', compact ? 'text-xs' : 'text-sm')}>
         {phases.map((phase) => {
           const colors = blockBarColors[phase.id] ?? defaultBlockColors
           return (
@@ -163,7 +173,12 @@ export function AdaptationPathTimeline({
 
       <div className="mt-4 overflow-x-auto pb-2">
         <div className="relative min-w-[640px]">
-          <div className="flex h-4 gap-0.5 overflow-hidden rounded-full bg-gray-100 p-0.5">
+          <div
+            className={cn(
+              'flex gap-0.5 overflow-hidden rounded-full bg-gray-100 p-0.5',
+              compact ? 'h-4' : 'h-5'
+            )}
+          >
             {weekSegments.map((week) => (
               <div
                 key={week.weekNumber}
@@ -210,7 +225,12 @@ export function AdaptationPathTimeline({
             title={`Сейчас: неделя ${currentWeek}`}
           />
 
-          <div className="mt-3 flex justify-between text-[10px] font-medium text-gray-400">
+          <div
+            className={cn(
+              'mt-4 flex justify-between font-medium text-gray-500',
+              compact ? 'text-[10px] text-gray-400' : 'text-base'
+            )}
+          >
             {weekSegments.map((week) => {
               const hasMilestone = milestones.some((m) => m.weekNumber === week.weekNumber)
               const anyCompleted = week.slices.some((s) => s.status === 'COMPLETED')
@@ -218,10 +238,12 @@ export function AdaptationPathTimeline({
                 <span
                   key={week.weekNumber}
                   className={cn(
-                    'flex flex-col items-center gap-0.5',
-                    week.weekNumber === currentWeek && 'font-bold text-primary',
+                    'flex flex-col items-center gap-1',
+                    !compact && 'min-w-[1.75rem]',
+                    week.weekNumber === currentWeek &&
+                      (compact ? 'font-bold text-primary' : 'text-lg font-bold text-primary'),
                     hasMilestone && week.weekNumber !== currentWeek && 'text-amber-600',
-                    anyCompleted && week.weekNumber !== currentWeek && !hasMilestone && 'text-gray-600'
+                    anyCompleted && week.weekNumber !== currentWeek && !hasMilestone && 'text-gray-700'
                   )}
                   title={
                     week.slices.length
@@ -229,8 +251,10 @@ export function AdaptationPathTimeline({
                       : undefined
                   }
                 >
-                  {hasMilestone && <MapPin className="h-2.5 w-2.5" />}
-                  {week.weekNumber}
+                  {hasMilestone && (
+                    <MapPin className={cn(compact ? 'h-2.5 w-2.5' : 'h-4 w-4')} aria-hidden />
+                  )}
+                  <span className={cn(!compact && 'tabular-nums')}>{week.weekNumber}</span>
                 </span>
               )
             })}

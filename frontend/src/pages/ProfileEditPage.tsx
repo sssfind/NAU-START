@@ -30,6 +30,7 @@ export function ProfileEditPage({ backTo }: ProfileEditPageProps) {
         department: profile.department ?? '',
         phone: profile.phone ?? '',
         position: profile.position ?? '',
+        responsibility: profile.responsibility ?? '',
       })
     }
   }, [profile, reset])
@@ -88,6 +89,17 @@ export function ProfileEditPage({ backTo }: ProfileEditPageProps) {
         <div>
           <Label htmlFor="phone">Телефон</Label>
           <Input id="phone" className="mt-1.5" {...register('phone')} />
+        </div>
+
+        <div>
+          <Label htmlFor="responsibility">Зона ответственности</Label>
+          <textarea
+            id="responsibility"
+            rows={3}
+            className="mt-1.5 w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            placeholder="Чем вы занимаетесь в команде"
+            {...register('responsibility')}
+          />
         </div>
 
         <div className="flex justify-end">

@@ -15,6 +15,7 @@ public class UserProfileResponse {
     private String department;
     private String phone;
     private String position;
+    private String responsibility;
     private String team;
     private String photoUrl;
     private Integer moodLevel;

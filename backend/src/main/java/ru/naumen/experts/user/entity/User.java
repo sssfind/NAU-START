@@ -41,6 +41,9 @@ public class User {
     @Column
     private String position;
 
+    @Column(columnDefinition = "TEXT")
+    private String responsibility;
+
     @Column(name = "photo_url")
     private String photoUrl;
 

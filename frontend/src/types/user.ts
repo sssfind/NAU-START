@@ -8,6 +8,7 @@ export interface UserProfile {
   department: string | null
   phone: string | null
   position: string | null
+  responsibility?: string | null
   team?: string | null
   photoUrl?: string | null
   moodLevel?: number
@@ -23,6 +24,7 @@ export interface UpdateProfileRequest {
   department?: string
   phone?: string
   position?: string
+  responsibility?: string
 }
 
 export interface Employee {
@@ -33,6 +35,8 @@ export interface Employee {
   department: string | null
   phone: string | null
   position: string | null
+  team: string | null
+  responsibility: string | null
   hrId: number | null
   hrFullName: string | null
 }

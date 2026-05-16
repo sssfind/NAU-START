@@ -70,6 +70,7 @@ export interface TraineeEmployee {
   phone: string | null
   position: string | null
   team: string | null
+  responsibility: string | null
   inMyTeam: boolean
 }
 

@@ -21,7 +21,10 @@ import ru.naumen.experts.user.dto.TraineeEmployeeResponse;
 import ru.naumen.experts.user.entity.User;
 import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.mapper.UserMapper;
+import ru.naumen.experts.user.dto.DepartmentListResponse;
+import ru.naumen.experts.user.dto.OrgStructureResponse;
 import ru.naumen.experts.user.repository.UserRepository;
+import ru.naumen.experts.user.service.OrgStructureService;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ public class TraineeService {
     private final TraineePlanTaskRepository taskRepository;
     private final TraineePlanTaskCommentRepository commentRepository;
     private final AdaptationPathService adaptationPathService;
+    private final OrgStructureService orgStructureService;
 
     @Transactional(readOnly = true)
     public TraineeDashboardResponse getDashboard(Long traineeId) {
@@ -71,20 +75,23 @@ public class TraineeService {
     }
 
     @Transactional(readOnly = true)
-    public PagedTraineeEmployeesResponse searchEmployees(Long traineeId, String search, int page, int size) {
+    public PagedTraineeEmployeesResponse searchEmployees(
+            Long traineeId, String search, String department, String team, int page, int size) {
         User trainee = requireTrainee(traineeId);
-        String team = normalizeTeam(trainee.getTeam());
+        String traineeTeam = normalizeTeam(trainee.getTeam());
 
         Pageable pageable = PageRequest.of(page, size);
         Page<User> result = userRepository.searchActiveUsersForTrainee(
                 traineeId,
-                team,
+                traineeTeam,
                 normalize(search),
+                normalize(department),
+                normalize(team),
                 pageable
         );
 
         List<TraineeEmployeeResponse> content = result.getContent().stream()
-                .map(user -> UserMapper.toTraineeEmployeeResponse(user, team))
+                .map(user -> UserMapper.toTraineeEmployeeResponse(user, traineeTeam))
                 .toList();
 
         return PagedTraineeEmployeesResponse.builder()
@@ -94,6 +101,18 @@ public class TraineeService {
                 .totalElements(result.getTotalElements())
                 .totalPages(result.getTotalPages())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public DepartmentListResponse listDepartments(Long traineeId) {
+        requireTrainee(traineeId);
+        return orgStructureService.listDepartments();
+    }
+
+    @Transactional(readOnly = true)
+    public OrgStructureResponse getOrgStructure(Long traineeId) {
+        requireTrainee(traineeId);
+        return orgStructureService.buildExcludingUser(traineeId);
     }
 
     private User requireTrainee(Long userId) {

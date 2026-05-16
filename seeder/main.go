@@ -8,6 +8,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,6 +19,40 @@ type Character struct {
 	FullName string
 	Dept     string
 	Position string
+}
+
+func responsibilityFor(c Character, role string) string {
+	switch role {
+	case "ROLE_HR":
+		return "Сопровождение адаптации, назначение наставников, работа со стажёрами"
+	case "ROLE_TRAINEE":
+		return "Прохождение программы адаптации и выполнение учебных задач"
+	}
+	pos := c.Position
+	switch {
+	case containsFold(pos, "lead"), containsFold(pos, "manager"):
+		return "Руководство командой, постановка задач, код-ревью"
+	case containsFold(pos, "dev"), containsFold(pos, "engineer"):
+		return "Разработка и сопровождение продуктовых задач в отделе " + c.Dept
+	case containsFold(pos, "qa"), containsFold(pos, "test"):
+		return "Качество релизов, тестирование и автоматизация"
+	case containsFold(pos, "design"), containsFold(pos, "ux"):
+		return "Продуктовый UX/UI и согласование макетов"
+	case containsFold(pos, "analyst"), containsFold(pos, "data"):
+		return "Аналитика, метрики и отчётность по продукту"
+	case containsFold(pos, "devops"), containsFold(pos, "sre"), containsFold(pos, "admin"):
+		return "Инфраструктура, CI/CD, доступы и стабильность окружений"
+	case containsFold(pos, "hr"), containsFold(pos, "recruit"):
+		return "Подбор, адаптация и кадровые процессы"
+	case containsFold(pos, "writer"):
+		return "Документация, база знаний и онбординг-материалы"
+	default:
+		return "Рабочие задачи в рамках отдела " + c.Dept
+	}
+}
+
+func containsFold(s, sub string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(sub))
 }
 
 var characters = []Character{
@@ -259,10 +294,11 @@ func seedHR(ctx context.Context, pool *pgxpool.Pool, passwordHash string) []int6
 		var id int64
 		phone := fmt.Sprintf("+7991%07d", 1000000+i*137)
 		err := pool.QueryRow(ctx, `
-			INSERT INTO users (email, password_hash, full_name, department, role, phone, position, team)
-			VALUES ($1, $2, $3, 'HR', 'ROLE_HR', $4, $5, 'HR Operations')
+			INSERT INTO users (email, password_hash, full_name, department, role, phone, position, team, responsibility)
+			VALUES ($1, $2, $3, 'HR', 'ROLE_HR', $4, $5, 'HR Operations', $6)
 			RETURNING id`,
-			fmt.Sprintf("hr%d@naumen.ru", i+1), passwordHash, c.FullName, phone, c.Position).Scan(&id)
+			fmt.Sprintf("hr%d@naumen.ru", i+1), passwordHash, c.FullName, phone, c.Position,
+			responsibilityFor(c, "ROLE_HR")).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки HR: %v", err)
 		}
@@ -294,9 +330,10 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 		}
 		phone := fmt.Sprintf("+7992%07d", 2000000+i*97)
 		_, err := pool.Exec(ctx, `
-			INSERT INTO users (email, password_hash, full_name, department, role, position, phone, team)
-			VALUES ($1, $2, $3, $4, 'ROLE_EMPLOYEE', $5, $6, $7)`,
-			fmt.Sprintf("emp%d@naumen.ru", i), passwordHash, c.FullName, c.Dept, c.Position, phone, team)
+			INSERT INTO users (email, password_hash, full_name, department, role, position, phone, team, responsibility)
+			VALUES ($1, $2, $3, $4, 'ROLE_EMPLOYEE', $5, $6, $7, $8)`,
+			fmt.Sprintf("emp%d@naumen.ru", i), passwordHash, c.FullName, c.Dept, c.Position, phone, team,
+			responsibilityFor(c, "ROLE_EMPLOYEE"))
 		if err != nil {
 			log.Fatalf("Ошибка вставки сотрудника %d: %v", i, err)
 		}
@@ -320,13 +357,13 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, role,
-				hr_id, team, phone, position, mood_level,
+				hr_id, team, phone, position, responsibility, mood_level,
 				progress_block_one, progress_block_two, progress_block_three
 			)
-			VALUES ($1, $2, $3, $4, 'ROLE_TRAINEE', $5, $6, $7, $8, 3, 0, 0, 0)
+			VALUES ($1, $2, $3, $4, 'ROLE_TRAINEE', $5, $6, $7, $8, $9, 3, 0, 0, 0)
 			RETURNING id`,
 			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept,
-			hrID, p.Team, phone, c.Position).Scan(&id)
+			hrID, p.Team, phone, c.Position, responsibilityFor(c, "ROLE_TRAINEE")).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %d: %v", p.Index, err)
 		}

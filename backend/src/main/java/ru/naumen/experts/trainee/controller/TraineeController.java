@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.naumen.experts.auth.jwt.JwtAuthenticationPrincipal;
 import ru.naumen.experts.trainee.service.TraineeService;
+import ru.naumen.experts.user.dto.DepartmentListResponse;
+import ru.naumen.experts.user.dto.OrgStructureResponse;
 import ru.naumen.experts.user.dto.PagedTraineeEmployeesResponse;
 import ru.naumen.experts.user.dto.TraineeDashboardResponse;
 
@@ -38,8 +40,26 @@ public class TraineeController {
     public ResponseEntity<PagedTraineeEmployeesResponse> searchEmployees(
             @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String department,
+            @RequestParam(required = false) String team,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(traineeService.searchEmployees(principal.getUserId(), search, page, size));
+        return ResponseEntity.ok(
+                traineeService.searchEmployees(
+                        principal.getUserId(), search, department, team, page, size));
+    }
+
+    @Operation(summary = "Список отделов для фильтра")
+    @GetMapping("/employees/departments")
+    public ResponseEntity<DepartmentListResponse> listDepartments(
+            @AuthenticationPrincipal JwtAuthenticationPrincipal principal) {
+        return ResponseEntity.ok(traineeService.listDepartments(principal.getUserId()));
+    }
+
+    @Operation(summary = "Оргструктура: отделы и команды")
+    @GetMapping("/employees/org-structure")
+    public ResponseEntity<OrgStructureResponse> getOrgStructure(
+            @AuthenticationPrincipal JwtAuthenticationPrincipal principal) {
+        return ResponseEntity.ok(traineeService.getOrgStructure(principal.getUserId()));
     }
 }

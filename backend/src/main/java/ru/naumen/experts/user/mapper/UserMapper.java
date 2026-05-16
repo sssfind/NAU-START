@@ -20,7 +20,8 @@ public final class UserMapper {
                 .role(user.getRole())
                 .department(user.getDepartment())
                 .phone(user.getPhone())
-                .position(user.getPosition());
+                .position(user.getPosition())
+                .responsibility(user.getResponsibility());
 
         if (user.getRole() == UserRole.ROLE_TRAINEE) {
             builder.team(user.getTeam() != null ? user.getTeam() : user.getDepartment())
@@ -46,6 +47,7 @@ public final class UserMapper {
                 .phone(user.getPhone())
                 .position(user.getPosition())
                 .team(user.getTeam())
+                .responsibility(user.getResponsibility())
                 .inMyTeam(isSameTeam(traineeTeam, user.getTeam()))
                 .build();
     }
@@ -73,6 +75,7 @@ public final class UserMapper {
                 .position(user.getPosition())
                 .photoUrl(user.getPhotoUrl())
                 .team(user.getTeam())
+                .responsibility(user.getResponsibility())
                 .totalProgress(calculateTotalProgress(user))
                 .moodLevel(user.getMoodLevel())
                 .hrId(hr != null ? hr.getId() : null)

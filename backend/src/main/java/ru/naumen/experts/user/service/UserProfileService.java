@@ -32,6 +32,7 @@ public class UserProfileService {
         user.setDepartment(emptyToNull(request.getDepartment()));
         user.setPhone(emptyToNull(request.getPhone()));
         user.setPosition(emptyToNull(request.getPosition()));
+        user.setResponsibility(emptyToNull(request.getResponsibility()));
 
         User saved = userRepository.save(user);
 

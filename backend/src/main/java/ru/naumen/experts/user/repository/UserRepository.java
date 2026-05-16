@@ -28,11 +28,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
                    OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
                    OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))
               AND (:department IS NULL OR :department = '' OR u.department = :department)
+              AND (:team IS NULL OR :team = '' OR (
+                   (:team = 'Без команды' AND (u.team IS NULL OR u.team = ''))
+                   OR u.team = :team
+              ))
             ORDER BY u.fullName ASC
             """)
     Page<User> searchActiveUsers(
             @Param("search") String search,
             @Param("department") String department,
+            @Param("team") String team,
             Pageable pageable);
 
     @Query("""
@@ -42,14 +47,51 @@ public interface UserRepository extends JpaRepository<User, Long> {
               AND (:search IS NULL OR :search = ''
                    OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
                    OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))
+              AND (:department IS NULL OR :department = '' OR u.department = :department)
+              AND (:team IS NULL OR :team = '' OR (
+                   (:team = 'Без команды' AND (u.team IS NULL OR u.team = ''))
+                   OR u.team = :team
+              ))
             ORDER BY
-              CASE WHEN :team IS NOT NULL AND :team <> '' AND u.team = :team THEN 0
+              CASE WHEN :traineeTeam IS NOT NULL AND :traineeTeam <> '' AND u.team = :traineeTeam THEN 0
                    ELSE 1 END,
+              u.department ASC,
+              u.team ASC,
               u.fullName ASC
             """)
     Page<User> searchActiveUsersForTrainee(
             @Param("excludeId") Long excludeId,
-            @Param("team") String team,
+            @Param("traineeTeam") String traineeTeam,
             @Param("search") String search,
+            @Param("department") String department,
+            @Param("team") String team,
             Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT u.department FROM User u
+            WHERE u.isActive = true AND u.department IS NOT NULL AND u.department <> ''
+            ORDER BY u.department ASC
+            """)
+    List<String> findDistinctDepartments();
+
+    @Query("""
+            SELECT u.department, u.team, COUNT(u)
+            FROM User u
+            WHERE u.isActive = true
+              AND u.department IS NOT NULL AND u.department <> ''
+            GROUP BY u.department, u.team
+            ORDER BY u.department ASC, u.team ASC
+            """)
+    List<Object[]> findDepartmentTeamCounts();
+
+    @Query("""
+            SELECT u.department, u.team, COUNT(u)
+            FROM User u
+            WHERE u.isActive = true
+              AND u.id <> :excludeId
+              AND u.department IS NOT NULL AND u.department <> ''
+            GROUP BY u.department, u.team
+            ORDER BY u.department ASC, u.team ASC
+            """)
+    List<Object[]> findDepartmentTeamCountsExcluding(@Param("excludeId") Long excludeId);
 }

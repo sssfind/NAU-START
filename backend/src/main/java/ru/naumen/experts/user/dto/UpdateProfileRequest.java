@@ -19,4 +19,7 @@ public class UpdateProfileRequest {
 
     @Size(max = 255, message = "Должность слишком длинная")
     private String position;
+
+    @Size(max = 1000, message = "Описание зоны ответственности слишком длинное")
+    private String responsibility;
 }
